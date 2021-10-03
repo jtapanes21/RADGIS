@@ -1,4 +1,4 @@
-from RADGIS2.utils import constants
+from ..utils import constants
 from ..core.trajectorydataframe import *
 from datetime import datetime, timedelta, time
 import pandas as pd
