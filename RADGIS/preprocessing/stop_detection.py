@@ -527,7 +527,7 @@ def travel_analysis(tdf, save_location, stop_radius_meters=20, minutes_for_a_sto
             print("Finished exporting the 'all points' shapefile.")
             print(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
-        return df_allpoints
+        #return df_allpoints
     else:
         pass
     
@@ -1051,7 +1051,11 @@ def travel_analysis(tdf, save_location, stop_radius_meters=20, minutes_for_a_sto
     print("Finished!")
     print(strftime("%Y-%m-%d %H:%M:%S", gmtime()))
     
-    return final_return
+    
+    if all_points == True:
+        return df_allpoints
+    else:
+        return final_return
 
 
 
