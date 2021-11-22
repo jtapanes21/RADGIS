@@ -6,8 +6,99 @@ import numpy as np
 from collections import namedtuple
 from datetime import datetime
 
+
+"""
+Co-occurence
+
+------------------------
+This module completes the crucial task of co-occurence - find places where two or more unique identifiers
+are observed within a specified distance and time delta. It was designed to work natively on the trajectory
+dataframe, thus if the input is a tdf many of the parameters are already stored as global variables in the 
+constants module and do not have to be provided. However, this module will also work on a pandas dataframe.
+In that case, the user would provide all of the parameters such as timestamp, lat, lon, etc columns.
+
+There are two private co-occurence functions in this module. One is designed to work on the output of the
+stop_detection module and the other is designed to work on raw data where only a lat, lon, timestamp, and
+unique group identifier for each person, animal, etc is needed. The public co_occurence function handles
+the assignment to the applicaple co-occurence function.
+
+_stop_co_occurence - function that processes the stops from the stop_detection module.
+_co_occurence - function processes raw data.
+
+DBSCAN clustering is utilized for each private function. However, DBSCAN clustering within the _stop_co_occurence
+function will likely be completed on much less data than the other private function. That is beccause only the 
+previously identified stops are run in the _stop_co_occurence function so the data has already been somewhat
+filtered to a smaller size than a raw dataset run in the _co_occurence function. Just FYI that DBSCAN does not
+scale well and can cause failure on memory issues. If running a large dataset - probably over 1 million records -
+through _co_occurence, you might want to try a different approach like temporal and spatial hashes.
+
+
+ Parameters
+    ----------
+    tdf or df : TrajDataFrame or Pandas DataFrame
+    group_colum : string, mandatory unless using a tdf
+        unique identifer for each person, animal, etc within the data.
+    epsilon_size : float, mandatory, defualt set at .1
+        the epsilon is used within the DBSCAN algorithm where .1 is 100 meters.
+    time_column : pandas timestamp, mandatory unless using a tdf
+    lat_column : float decimal degree, mandatory unless using a tdf
+    lon_column : float decimal degree, mandatory unless using a tdf
+    min_column : pandas timestamp, optional
+        if using the output from the _stop_co_occurence private function this will auto-populate
+        if using raw data, then this will be created within the _co_occurence private function
+    max_column : pandas timestamp, optional
+        if using the output from the _stop_co_occurence private function this will auto-populate
+        if using raw data, then this will be created within the _co_occurence private function
+    simple : boolean, optional - set to False
+        True - only spatial co-occurence is completed
+        False - spatial-temporal co-occurence is completed
+    
+    
+ Returns
+    -------
+    TrajDataFrame or Pandas DataFrame
+        the dataframe of only co-occurence
+    Columns returned
+        Co-Occurence
+            the dbscan cluster name
+        co_stops
+            the stop numbering convention for each UID; a stop occurs if there are at least 2 points
+            in sequential order within a cluster. If using raw data, there is no time limit for a stop.
+        co_counter
+            the number of records per each UID per each stop within the cluster
+        min
+            the datetime of the first record for the stop
+        max
+            the datetime of the last record for the stop
+        co_occurence
+            a list of dictionaries that contain corresponding co-occurence where the key is the corresponding
+            UID and the value is the amount of seconds the co-occurence took place. If simple = True, the list
+            will only contain the corresponding UIDs for spatial co-occurence.
+    
+  
+    Examples
+    --------
+    >>> tdf_co = co_occurence.co_occurence(tdf, "uid")
+
+
+
+
+
+
+
+"""
+
+
+
+
+
+
+
+
 def co_occurence(tdf, group_column, epsilon_size=.1, time_column=constants.DATETIME, lat_column=constants.LATITUDE, lon_column=constants.LONGITUDE, min_column=None, max_column=None, simple=False):
     tdf = tdf.copy()
+    
+    tdf[group_column] = tdf[group_column].astype(int)
 
     if min_column != None:
         tdf = _stop_co_occurence(tdf=tdf, group_column=group_column, epsilon_size=epsilon_size, time_column=time_column, lat_column=lat_column, lon_column=lon_column, min_column=min_column, max_column=max_column, simple=simple)
